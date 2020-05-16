@@ -6,9 +6,6 @@ sub_block_path = strcat(subject_number,'/',block);
 subject_data = load(strcat(subject_number,'.mat'));
 
 signal_arr = [{'cardiacraw'} {'respraw'} {'skinconductance'} {'cardfilt'} {'respfilt'}];
-
-for i=1:numel(signal_arr)
-end
 %% Code
 
 mkdir(sub_block_path);
@@ -99,14 +96,15 @@ fig_name = strcat(subject_save_path,'_triggers_plot.fig');
 savefig(fig_name);
 
 
-%% set up for saving signals
+
 signal = 'cardfilt';
 signal_match_arr = ismember(titles_str_arr,signal);%find index of signal in titles
 idx_of_signal_indata = find(signal_match_arr == 1);
 
 %% loop to get each run data and save
 for i=1:numel(start_times)
-    
+
+%% Get run timing info
     start_time =start_times(i);
     end_time = end_times(i);
     disp(strcat('run ',num2str(i)));
@@ -120,18 +118,27 @@ for i=1:numel(start_times)
     idx_run_ticks = find(tick_times >= start_time & tick_times<= end_time);
     run_physio_data = subj_physio_data(:,idx_run_ticks);
     times_run = tick_times(idx_run_ticks);
-    
-    signal_data = run_physio_data(idx_of_signal_indata,:);
-    
-    column_time_signal = transpose([times_run; signal_data]);
-    
-    plot(column_time_signal(:,1),column_time_signal(:,2));
-    
-    run_string = num2str(i);
-    run_file = sprintf('%s/%s_%s_%s.txt',subject_number,'run', run_string,signal);
-    
-    input('check plot')
-    dlmwrite(run_file,column_time_signal ,'delimiter',',','precision',10);
+%% loop over signals for each run  
+
+    for signal_idx=1:numel(signal_arr)
+        
+        %get signal name and find index for column in data array
+        signal_cell = signal_arr(signal_idx);
+        signal = signal_cell{:};
+        signal_match_arr = ismember(titles_str_arr,signal);%find index of signal in titles
+        idx_of_signal_indata = find(signal_match_arr == 1);
+        
+        signal_data = run_physio_data(idx_of_signal_indata,:);
+        column_time_signal = transpose([times_run; signal_data]);
+        plot(column_time_signal(:,1),column_time_signal(:,2));
+        input('check plot')
+        
+        %create name for save file and save
+        run_string = num2str(i);
+        run_file = sprintf('%s/%s_%s_%s.txt',subject_number,'run', run_string,signal);
+        dlmwrite(run_file,column_time_signal ,'delimiter',',','precision',10);
+        
+    end
     
 
 end
