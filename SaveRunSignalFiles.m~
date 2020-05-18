@@ -64,7 +64,7 @@ len_runs = length(start_end_column_arr);
 comments_stringified = cellstr(comments_text);
 comments_length = length(comments_stringified);
 
-subject_save_path =strcat(subject_number, '/', subject_number,'_block_2');
+subject_save_path =strcat(sub_block_path, '/', subject_number,'_block_2');
 run_times_name = strcat(subject_save_path,'_run_start_end_times.csv');
 
 if comments_length < len_runs
@@ -83,10 +83,8 @@ end
 plot(tick_times, mri_triggers)
 hold on
 plot(scanner_trigger_times,ones(numel(scanner_trigger_times),1)*4.5,'ys')
-plotted = end_times;
-plot(plotted, ones(numel(plotted),1)*4, 'gs')
-plotted = start_times;
-plot(plotted, ones(numel(plotted),1)*4.1, 'rs')
+plot(end_times, ones(numel(end_times),1)*4, 'gs')
+plot(start_times, ones(numel(start_times),1)*4.1, 'rs')
 hold off
 
 input('check plot ');
@@ -94,12 +92,6 @@ input('check plot ');
 %% Save graph and run start times for references
 fig_name = strcat(subject_save_path,'_triggers_plot.fig');
 savefig(fig_name);
-
-
-
-signal = 'cardfilt';
-signal_match_arr = ismember(titles_str_arr,signal);%find index of signal in titles
-idx_of_signal_indata = find(signal_match_arr == 1);
 
 %% loop to get each run data and save
 for i=1:numel(start_times)
@@ -113,13 +105,12 @@ for i=1:numel(start_times)
     disp('end time ')
     disp(num2str(end_time));
     disp(' ');
-    
-    
+     
     idx_run_ticks = find(tick_times >= start_time & tick_times<= end_time);
     run_physio_data = subj_physio_data(:,idx_run_ticks);
     times_run = tick_times(idx_run_ticks);
+    
 %% loop over signals for each run  
-
     for signal_idx=1:numel(signal_arr)
         
         %get signal name and find index for column in data array
@@ -135,11 +126,10 @@ for i=1:numel(start_times)
         
         %create name for save file and save
         run_string = num2str(i);
-        run_file = sprintf('%s/%s_%s_%s.txt',subject_number,'run', run_string,signal);
+        run_file = sprintf('%s/%s_%s_%s.txt',subject_n,'run', run_string,signal);
         dlmwrite(run_file,column_time_signal ,'delimiter',',','precision',10);
         
     end
-    
 
 end
 
