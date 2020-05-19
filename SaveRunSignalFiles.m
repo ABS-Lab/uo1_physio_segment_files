@@ -1,6 +1,6 @@
 clear all;
 %% Must change manually for each subject
-subject_number = 'FSMAP_009_A';
+subject_number = 'FSMAP_059_190213';
 block ='block2/unamed';
 sub_block_path = strcat(subject_number,'/',block);
 subject_data = load(strcat(subject_number,'.mat'));
@@ -58,7 +58,6 @@ start_end_column_arr = transpose([start_times; end_times]);
 
 column_names = [{'start_time'},{'end_time'},{'duration'}];
 start_end_column_arr(:,3) = start_end_column_arr(:,2)-start_end_column_arr(:,1);
-save_table = array2table(start_end_column_arr, 'VariableNames', column_names);
 len_runs = length(start_end_column_arr);
 
 comments_stringified = cellstr(comments_text);
@@ -68,16 +67,13 @@ subject_save_path =strcat(sub_block_path, '/', subject_number,'_block_2');
 run_times_name = strcat(subject_save_path,'_run_start_end_times.csv');
 
 if comments_length < len_runs
-    comments_stringified(comments_length + 1: len_runs) = {' '};
-    save_table.comments = comments_stringified;
-    writetable(save_table,run_times_name)
+    comments_stringified(comments_length + 1: len_runs) = {' '}; 
 else
-    run_times_name = strcat(subject_save_path,'_run_start_end_times.csv');
-    csvwrite(run_times_name, start_end_column_arr);
-    comments_name = strcat(subject_save_path,'_text_comments.csv');
-    csvwrite(comments_name,comments_text);
-    
+    start_end_column_arr(len_runs+1:comments_length,1:end) = zeros(1,3); 
 end
+save_table = array2table(start_end_column_arr, 'VariableNames', column_names);
+save_table.comments = comments_stringified;
+writetable(save_table,run_times_name)
 
 %% Create Graph for visual inspection of runs
 plot(tick_times, mri_triggers)

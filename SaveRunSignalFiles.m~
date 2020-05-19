@@ -1,7 +1,7 @@
 clear all;
 %% Must change manually for each subject
-subject_number = 'FSMAP_009_A';
-block ='block2';
+subject_number = 'FSMAP_059_190213';
+block ='block2/unamed';
 sub_block_path = strcat(subject_number,'/',block);
 subject_data = load(strcat(subject_number,'.mat'));
 
@@ -72,10 +72,10 @@ if comments_length < len_runs
     save_table.comments = comments_stringified;
     writetable(save_table,run_times_name)
 else
-    run_times_name = strcat(subject_save_path,'_run_start_end_times.csv');
-    csvwrite(run_times_name, start_end_column_arr);
+    writetable(save_table,run_times_name)
     comments_name = strcat(subject_save_path,'_text_comments.csv');
-    csvwrite(comments_name,comments_text);
+    comments_str = string(comments_text);
+    csvwrite(comments_name,comments);
     
 end
 
@@ -122,11 +122,11 @@ for i=1:numel(start_times)
         signal_data = run_physio_data(idx_of_signal_indata,:);
         column_time_signal = transpose([times_run; signal_data]);
         plot(column_time_signal(:,1),column_time_signal(:,2));
-        input('check plot')
+        %input('check plot')
         
         %create name for save file and save
         run_string = num2str(i);
-        run_file = sprintf('%s/%s_%s_%s.txt',subject_n,'run', run_string,signal);
+        run_file = sprintf('%s/%s_%s_run_%s.txt',sub_block_path,signal,subject_number, run_string);
         dlmwrite(run_file,column_time_signal ,'delimiter',',','precision',10);
         
     end
