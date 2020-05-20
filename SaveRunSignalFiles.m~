@@ -1,6 +1,6 @@
 clear all;
 %% Must change manually for each subject
-subject_number = 'FSMAP_059_190213';
+subject_number = 'FSMAP_092_A';
 block ='block2/unamed';
 sub_block_path = strcat(subject_number,'/',block);
 subject_data = load(strcat(subject_number,'.mat'));
@@ -18,11 +18,13 @@ if (number_of_names == 16)
     disp('two total blocks')
 end
 
-titles = subject_data.titles_block2;
+titles = subject_data.titles_block4;
 titles_str_arr = cellstr(titles);%convert to string array
 
-tick_times = subject_data.ticktimes_block2;%timing data
-subj_physio_data = subject_data.data_block2;%data data
+tick_times = subject_data.ticktimes_block4;%timing data
+subj_physio_data = subject_data.data_block4;%data data
+tick_times_comments = subject_data.comtick_block4;%comments
+comments_text = subject_data.comtext_block4;%comments
 
 mri_triggers = subj_physio_data(1,1:end);
 raw_signals = {'respraw','skinconductance','cardiacraw'};
@@ -30,8 +32,6 @@ filt_signals = {'respfilt','cardfilt'};
 
 
 %% if there are multiple subject zeros may need to change to block 3 etc.
-tick_times_comments = subject_data.comtick_block2;
-comments_text = subject_data.comtext_block2;
 trigger_ticks_idx = find(mri_triggers>3);%assumes triggers are taller than 3
 
 %% get trigger times
@@ -58,8 +58,7 @@ start_end_column_arr = transpose([start_times; end_times]);
 
 column_names = [{'start_time'},{'end_time'},{'duration'}];
 start_end_column_arr(:,3) = start_end_column_arr(:,2)-start_end_column_arr(:,1);
-save_table = array2table(start_end_column_arr, 'VariableNames', column_names);
-len_runs = length(start_end_column_arr);
+len_runs = numel(start_end_column_arr)/3;
 
 comments_stringified = cellstr(comments_text);
 comments_length = length(comments_stringified);
@@ -68,16 +67,14 @@ subject_save_path =strcat(sub_block_path, '/', subject_number,'_block_2');
 run_times_name = strcat(subject_save_path,'_run_start_end_times.csv');
 
 if comments_length < len_runs
-    comments_stringified(comments_length + 1: len_runs) = {' '};
-    save_table.comments = comments_stringified;
-    writetable(save_table,run_times_name)
+    comments_stringified(comments_length + 1: len_runs,1) = {' '}; 
 else
-    writetable(save_table,run_times_name)
-    comments_name = strcat(subject_save_path,'_text_comments.csv');
-    comments_str = string(comments_text);
-    csvwrite(comments_name,comments);
-    
+    n_rows = comments_length-len_runs;
+    start_end_column_arr(len_runs+1:comments_length,1:end) = zeros(n_rows,3); 
 end
+save_table = array2table(start_end_column_arr, 'VariableNames', column_names);
+save_table.comments = comments_stringified;
+writetable(save_table,run_times_name)
 
 %% Create Graph for visual inspection of runs
 plot(tick_times, mri_triggers)

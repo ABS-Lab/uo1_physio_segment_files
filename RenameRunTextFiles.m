@@ -2,7 +2,7 @@ clear;
 
 %% load table from run 
 base_path='';
-subject ='FSMAP_059_190213';
+subject ='FSMAP_069_A';
 subject_block_dir_path = [base_path subject '/block2/']; 
 subject_unamed_dir_path=[subject_block_dir_path 'unamed'];
 
